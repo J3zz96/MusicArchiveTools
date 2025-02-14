@@ -1,6 +1,6 @@
 # RenameIamges.py
-Este script busca en la carpeta actual y renombra las imagenes que salen por defecto en el escaner XEROX a imagen001... etc dejando 
-con el mismo nombre a la portada(Importante que ya exista la imagen con el nombre portada) 
+Este script busca en la carpeta actual y renombra las imagenes que salen por defecto en el escaner XEROX a imagen001, imagen2, etc... dejando 
+con el mismo nombre a la portada (importante que ya exista la imagen con el nombre portada) 
 aquí un ejemplo:
 - Escanear oct. 01, 2024 (1).TIF -> imagen001.TIF
 - Escanear oct. 01, 2024 (2).TIF -> imagen002.TIF
