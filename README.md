@@ -16,3 +16,11 @@ aquí un ejemplo:
   
 Importante tomar en cuenta que toma los números internos en el parentesis así como las letras del abcedario como se muestra en el "*" 
 
+- 📂 Carpeta raíz
+    - 📂 Apellido
+        - 📂 input
+          - Escanear oct. 01, 2024 (1).TIF -> imagen001.TIF
+          - Escanear oct. 01, 2024 (2).TIF -> imagen002.TIF
+          - Escanear oct. 01, 2024 (3).TIF -> imagen003.TIF
+          - Escanear oct. 01, 2024 (4).TIF -> imagen004.TIF
+    - 📂 Apellido
