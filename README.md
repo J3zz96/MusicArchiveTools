@@ -16,11 +16,28 @@ aquí un ejemplo:
   
 Importante tomar en cuenta que toma los números internos en el parentesis así como las letras del abcedario como se muestra en el "*" 
 
-- 📂 Carpeta raíz
-    - 📂 Apellido
+# RenameIamgesBatch.py
+Este script tomo como base el de RanameImages.py y lo ejecuta por lotes (Tienen que tener la carpeta de input para que funcione)
+
+- 📂 Carpeta actual (aquí se ejecuta el script)
+    - 📂 Apellido, Nombre - Título. Editorial
         - 📂 input
           - Escanear oct. 01, 2024 (1).TIF -> imagen001.TIF
           - Escanear oct. 01, 2024 (2).TIF -> imagen002.TIF
           - Escanear oct. 01, 2024 (3).TIF -> imagen003.TIF
           - Escanear oct. 01, 2024 (4).TIF -> imagen004.TIF
-    - 📂 Apellido
+           - Escanear oct. 01, 2024 (5).TIF -> imagen005.TIF
+          - Escanear oct. 01, 2024 (6).TIF -> imagen006.TIF
+          - Escanear oct. 01, 2024 (6A).TIF -> imagen007.TIF
+          - portada.TIF -> portada.TIF
+    - 📂 Apellido, Nombre - Título. Editorial
+         - 📂 input
+            - Escanear oct. 01, 2024 (1).TIF -> imagen001.TIF
+            - Escanear oct. 01, 2024 (2).TIF -> imagen002.TIF
+            - Escanear oct. 01, 2024 (3).TIF -> imagen003.TIF
+            - Escanear oct. 01, 2024 (4).TIF -> imagen004.TIF
+             - Escanear oct. 01, 2024 (5).TIF -> imagen005.TIF
+            - Escanear oct. 01, 2024 (6).TIF -> imagen006.TIF
+            - Escanear oct. 01, 2024 (6A).TIF -> imagen007.TIF
+            - portada.TIF -> portada.TIF
+- 📂 Etc .......
