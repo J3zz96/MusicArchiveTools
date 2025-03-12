@@ -27,8 +27,8 @@ Configuración recomendada del sistema
 ## Guias-y-Tutoriales
 
 
-
-# PortadaExtractor.py
+# Scripts y herramientas para facilitar el flujo de trabajo
+## PortadaExtractor.py
 Este script busca y copia todas las portadas dentro de la carpeta actual a una carpeta nueva llamada portadas (no es necesesario crear la carpeta de portadas)
 - 📂 Carpeta actual (aquí se ejecuta el script)
     - 📂 APELLIDO, Nombre - Ejemplo. Editorial
@@ -47,7 +47,7 @@ Este script busca y copia todas las portadas dentro de la carpeta actual a una c
   - portada de APELLIDO, NOMBRE - Ejemplo
   - portada de APELLIDO, NOMBRE - Otro ejemplo
 
-# RenameIamges.py
+## RenameIamges.py
 Este script busca en la carpeta actual y renombra las imagenes que salen por defecto en el escaner XEROX a imagen001, imagen002, etc... dejando 
 con el mismo nombre a la portada (importante que ya exista la imagen con el nombre portada) 
 aquí un ejemplo:
@@ -65,7 +65,7 @@ aquí un ejemplo:
   
 Importante tomar en cuenta que toma los números internos en el parentesis así como las letras del abcedario como se muestra en el "*" 
 
-# RenameIamgesBatch.py
+## RenameIamgesBatch.py
 Este script tomo como base el de RanameImages.py y lo ejecuta por lotes (Tienen que tener la carpeta de input para que funcione)
 
 - 📂 Carpeta actual (aquí se ejecuta el script)
