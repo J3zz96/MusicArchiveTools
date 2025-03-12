@@ -16,7 +16,7 @@ Objetivo del proyecto (digitalización y catalogación de partituras)
 Hardware necesario (escáneres recomendados, cámara, etc.)
 Software requerido (escáner, edición de imágenes, OCR, OMR)
 Configuración recomendada del sistema
-## Guias-Tutoriales
+## Guías y Tutoriales
 
 
 
