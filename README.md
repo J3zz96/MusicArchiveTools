@@ -1,7 +1,7 @@
 ## Índice
 - [Introducción](#Introducción)
 - [Requisitos](#Requisitos)
-- [Guías y Tutoriales](#GuiasyTutoriales)
+- [Guías y Tutoriales](#Guias-y-Tutoriales)
   - [Escaneo de partituras](#cost-estimation)
   - [Postprocesamiento de Imágenes](#cost-estimation)
   - [Organizacion y Catalogación](#cost-estimation)
