@@ -1,55 +1,22 @@
 ## Índice
 - [Introducción](#Introducción)
+- [Requisitos](#Requisitos)
+- [Guías y Tutoriales](#Guias-Tutoriales)
+  - [Escaneo de partituras](#cost-estimation)
+  - [Postprocesamiento de Imágenes](#cost-estimation)
+  - [Organizacion y Catalogación](#cost-estimation)
+    - [Convención de nombres de archivos](#github-codespaces)
+    
 
+## Introducción 
 ¿Qué es este repositorio?
 Objetivo del proyecto (digitalización y catalogación de partituras)
 ¿Para quién está dirigido?
-Requisitos
-
+## Requisitos
 Hardware necesario (escáneres recomendados, cámara, etc.)
 Software requerido (escáner, edición de imágenes, OCR, OMR)
 Configuración recomendada del sistema
-Guías y Tutoriales
-
-📖 Escaneo de Partituras
-Preparación de documentos
-Configuración del escáner
-Formatos de archivo recomendados
-Flujo de trabajo óptimo
-🖼 Postprocesamiento de Imágenes
-Limpieza y mejora de calidad
-Conversión a blanco y negro (CCITT Group 4)
-Corrección de alineación y recorte
-🎼 Digitalización Musical (OMR y OCR)
-Reconocimiento de notación musical
-Conversión a MusicXML
-🗂 Organización y Catalogación
-Convención de nombres de archivos
-Uso de metadatos y etiquetas
-Estructura del repositorio
-Automatización del Proceso
-
-Scripts y herramientas para facilitar el flujo de trabajo
-Ejemplos de código y automatización
-Almacenamiento y Publicación
-
-Organización de archivos en la nube
-Acceso y consulta en línea
-Licencias y derechos de autor
-Contribuir al Proyecto
-
-Cómo colaborar y aportar mejoras
-Reporte de errores y sugerencias
-Referencias y Recursos Adicionales
-
-Bibliografía y enlaces útiles
-
-
-
-
-## Introducción 
-
-
+## Guias-Tutoriales
 
 
 
