@@ -1,7 +1,7 @@
 ## Índice
 - [Introducción](#Introducción)
 - [Requisitos](#Requisitos)
-- [Guías y Tutoriales](#Guias y Tutoriales)
+- [Guías y Tutoriales](#GuiasyTutoriales)
   - [Escaneo de partituras](#cost-estimation)
   - [Postprocesamiento de Imágenes](#cost-estimation)
   - [Organizacion y Catalogación](#cost-estimation)
@@ -16,7 +16,7 @@ Objetivo del proyecto (digitalización y catalogación de partituras)
 Hardware necesario (escáneres recomendados, cámara, etc.)
 Software requerido (escáner, edición de imágenes, OCR, OMR)
 Configuración recomendada del sistema
-## Guías y Tutoriales
+## Guias-y-Tutoriales
 
 
 
