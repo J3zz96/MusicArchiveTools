@@ -6,8 +6,9 @@
   - [Postprocesamiento de Imágenes](#cost-estimation)
   - [Organizacion y Catalogación](#cost-estimation)
     - [Convención de nombres de archivos](#github-codespaces)
-    
-
+- [Automatización del Proceso](#Guias-y-Tutoriales)
+    - [Scripts y herramientas para facilitar el flujo de trabajo](#github-codespaces)
+  
 ## Introducción 
 ¿Qué es este repositorio?
 Objetivo del proyecto (digitalización y catalogación de partituras)
