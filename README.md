@@ -8,6 +8,13 @@
     - [Convención de nombres de archivos](#github-codespaces)
 - [Automatización del Proceso](#Guias-y-Tutoriales)
     - [Scripts y herramientas para facilitar el flujo de trabajo](#github-codespaces)
+- [Almacenamiento y Publicación](#Guias-y-Tutoriales)
+    - [Organización de archivos en la nube](#github-codespaces)
+    - [Acceso y consulta en línea](#github-codespaces)
+    - [Licencias y derechos de autor](#github-codespaces)
+- [Contribuir al Proyecto](#Guias-y-Tutoriales)
+    - [Cómo colaborar y aportar mejoras](#github-codespaces)
+    - [Reporte de errores y sugerencias](#github-codespaces)
   
 ## Introducción 
 ¿Qué es este repositorio?
