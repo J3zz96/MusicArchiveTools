@@ -3,11 +3,10 @@
 - [Requisitos](#Requisitos)
 - [Guías y Tutoriales](#Guias-y-Tutoriales)
   - [Escaneo de partituras](#cost-estimation)
-  - [Postprocesamiento de Imágenes](#cost-estimation)
-  - [Organizacion y Catalogación](#cost-estimation)
     - [Convención de nombres de archivos](#github-codespaces)
-- [Automatización del Proceso](#Guias-y-Tutoriales)
-    - [Scripts y herramientas para facilitar el flujo de trabajo](#github-codespaces)
+  - [Postprocesamiento de Imágenes](#cost-estimation)
+  - [Automatización del Proceso](#Guias-y-Tutoriales)
+- [Scripts y herramientas para facilitar el flujo de trabajo](#github-codespaces)
 - [Almacenamiento y Publicación](#Guias-y-Tutoriales)
     - [Organización de archivos en la nube](#github-codespaces)
     - [Acceso y consulta en línea](#github-codespaces)
@@ -17,11 +16,25 @@
     - [Reporte de errores y sugerencias](#github-codespaces)
   
 ## Introducción 
-¿Qué es este repositorio?
-Objetivo del proyecto (digitalización y catalogación de partituras)
-¿Para quién está dirigido?
+Este repositorio ofrece una solución innovadora para el escaneo y procesamiento de partituras, automatizando la generación de archivos PDF a partir de imágenes. Diseñado para músicos, educadores y entusiastas de la música, este proyecto simplifica la digitalización de partituras, permitiendo una conversión rápida y precisa a formatos listos para imprimir o compartir.
 ## Requisitos
-Hardware necesario (escáneres recomendados, cámara, etc.)
+Para garantizar el mejor rendimiento y compatibilidad con este proyecto, se recomienda utilizar los siguientes dispositivos de hardware:
+
+Escáneres recomendados:
+
+* Xerox DocuMate 4700: Un escáner robusto con una resolución de hasta 1200 DPI, ideal para digitalizar partituras sueltas y portadas con gran precisión y calidad.
+
+* CZUR ET24 Pro: Un escáner inteligente con funciones avanzadas, perfecto para la captura de imágenes de libros encuadernados o empastados. Su tecnología permite un escaneo rápido y eficiente, incluso para documentos difíciles de manipular
+  
+Si no cuentas con los escáneres mencionados, puedes utilizar las siguientes opciones:
+
+* Otros modelos de escáneres:
+Cualquier escáner con una resolución mínima de 300 DPI y funcionalidades básicas de digitalización puede ser compatible. Asegúrate de que el escáner permita ajustes de brillo, contraste y formato de salida (por ejemplo, JPEG, TIF, PNG).
+
+* Cámara digital de alta resolución:
+Una cámara con una resolución mínima de 12 MP y un trípode para estabilidad puede ser una excelente alternativa. Recomendamos utilizar iluminación adecuada y un fondo uniforme para garantizar capturas nítidas y consistentes.
+
+
 Software requerido (escáner, edición de imágenes, OCR, OMR)
 Configuración recomendada del sistema
 ## Guias-y-Tutoriales
