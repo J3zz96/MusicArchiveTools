@@ -1,6 +1,8 @@
 ## Índice
 - [Introducción](#Introducción)
 - [Requisitos](#Requisitos)
+  - [Hardware](#Hardware)
+  - [Software](#Software)
 - [Guías y Tutoriales](#Guias-y-Tutoriales)
   - [Escaneo de partituras](#cost-estimation)
     - [Convención de nombres de archivos](#github-codespaces)
@@ -18,6 +20,7 @@
 ## Introducción 
 Este repositorio ofrece una solución innovadora para el escaneo y procesamiento de partituras, automatizando la generación de archivos PDF a partir de imágenes. Diseñado para músicos, educadores y entusiastas de la música, este proyecto simplifica la digitalización de partituras, permitiendo una conversión rápida y precisa a formatos listos para imprimir o compartir.
 ## Requisitos
+### Hardware
 Para garantizar el mejor rendimiento y compatibilidad con este proyecto, se recomienda utilizar los siguientes dispositivos de hardware:
 
 Escáneres recomendados:
@@ -35,8 +38,29 @@ Cualquier escáner con una resolución mínima de 300 DPI y funcionalidades bás
 Una cámara con una resolución mínima de 12 MP y un trípode para estabilidad puede ser una excelente alternativa. Recomendamos utilizar iluminación adecuada y un fondo uniforme para garantizar capturas nítidas y consistentes.
 
 
-Software requerido (escáner, edición de imágenes, OCR, OMR)
-Configuración recomendada del sistema
+### Software
+
+Software básico de Windows:
+
+* Visor de Fotos: Para visualizar y organizar las imágenes escaneadas o capturadas.
+
+* Paint: Para realizar ediciones simples, como recortes o ajustes básicos.
+
+Software de postprocesamiento:
+
+* GIMP (GNU Image Manipulation Program): Una herramienta de software libre ideal para ediciones más avanzadas, como corrección de colores, recorte preciso y eliminación de imperfecciones.
+
+Software de los escáneres:
+
+Utiliza el software predeterminado que viene con tu escáner (por ejemplo, Xerox o CZUR) para configurar y optimizar el proceso de escaneo.
+
+Generación automática de PDFs:
+
+* Python: Se utiliza para automatizar la creación de archivos PDF a partir de las imágenes procesadas. Se recomienda el uso de bibliotecas como Pillow y img2pdf.
+
+### Configuración recomendada del sistema
+Para este proyecto
+
 ## Guias-y-Tutoriales
 
 
