@@ -1,218 +1,309 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from PIL import Image
+from PIL import Image, ExifTags
 import img2pdf
+import re
+from collections import defaultdict
 
-# Función para centrar la ventana
-def centrar_ventana(ventana, ancho, alto):
-    pantalla_ancho = ventana.winfo_screenwidth()
-    pantalla_alto = ventana.winfo_screenheight()
-    x = (pantalla_ancho // 2) - (ancho // 2)
-    y = (pantalla_alto // 2) - (alto // 2)
-    ventana.geometry(f"{ancho}x{alto}+{x}+{y}")
-
-# Función para seleccionar carpeta
-def seleccionar_carpeta():
-    carpeta = filedialog.askdirectory()
-    if carpeta:
-        entry_carpeta.delete(0, tk.END)
-        entry_carpeta.insert(0, carpeta)
-
-# Función para gestionar la selección de Internas
-def seleccionar_internas(opcion):
-    if opcion == "CCITT Group 4":
-        messagebox.showwarning("Aviso", "Las imágenes internas deben estar en blanco y negro para CCITT Group 4.")
-    opcion_internas.set(opcion)
-
-# Función para gestionar la compresión JPEG
-def toggle_compresion_jpeg(tipo):
-    if tipo == "portada":
-        if compresion_jpeg_portada.get():
-            spin_calidad_jpeg_portada.config(state=tk.NORMAL)
-        else:
-            spin_calidad_jpeg_portada.config(state=tk.DISABLED)
-    elif tipo == "contraportada":
-        if compresion_jpeg_contraportada.get():
-            spin_calidad_jpeg_contraportada.config(state=tk.NORMAL)
-        else:
-            spin_calidad_jpeg_contraportada.config(state=tk.DISABLED)
-
-# Función para actualizar la barra de progreso
-def actualizar_progreso(valor, texto=None):
-    if texto:
-        progress_label.config(text=texto)
-    progress_bar['value'] = valor
-    root.update_idletasks()
-
-# Función para convertir imágenes a PDF
-def convertir_imagenes_a_pdf(input_folder, output_folder, dpi, formato, calidad_jpeg=None):
-    imagenes = []
-    for archivo in sorted(os.listdir(input_folder)):
-        if archivo.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp')):
-            ruta_imagen = os.path.join(input_folder, archivo)
-            if calidad_jpeg is not None:
-                img = Image.open(ruta_imagen)
-                img.save(ruta_imagen, quality=calidad_jpeg, optimize=True)
-            imagenes.append(ruta_imagen)
-    
-    if not imagenes:
-        raise ValueError("No se encontraron imágenes en la carpeta 'input'.")
-
-    pdf_output = os.path.join(output_folder, "output.pdf")
-    with open(pdf_output, "wb") as f:
-        if formato == "CCITT Group 4":
-            imagenes_pil = [Image.open(img).convert('1') for img in imagenes]  # Convertir a B/N
-            f.write(img2pdf.convert(imagenes_pil))
-        else:
-            f.write(img2pdf.convert(imagenes))
-
-# Función principal para procesar imágenes
-def procesar():
-    root_folder = entry_carpeta.get()
-    
-    if not root_folder or not os.path.isdir(root_folder):
-        messagebox.showerror("Error", "Seleccione una carpeta válida.")
-        return
-
+# ------------------------- FUNCIONES DE PROCESAMIENTO -------------------------
+def correct_exif_orientation(img):
+    """Corrige la orientación de la imagen basada en metadatos EXIF."""
     try:
-        dpi_portadas = int(spin_dpi_portada.get())
-        dpi_contraportadas = int(spin_dpi_contraportada.get())
-        formato_internas = opcion_internas.get()
-        calidad_jpeg_portada = int(spin_calidad_jpeg_portada.get()) if compresion_jpeg_portada.get() else None
-        calidad_jpeg_contraportada = int(spin_calidad_jpeg_contraportada.get()) if compresion_jpeg_contraportada.get() else None
+        if hasattr(img, '_getexif'):
+            exif = img._getexif()
+            if exif:
+                for tag, value in exif.items():
+                    if ExifTags.TAGS.get(tag) == 'Orientation':
+                        if value == 3:
+                            img = img.rotate(180, expand=True)
+                        elif value == 6:
+                            img = img.rotate(270, expand=True)
+                        elif value == 8:
+                            img = img.rotate(90, expand=True)
+    except (AttributeError, KeyError, IndexError):
+        pass
+    return img
 
-        # Validaciones
-        if dpi_portadas < 150 or dpi_portadas > 1200 or dpi_contraportadas < 150 or dpi_contraportadas > 1200:
-            raise ValueError("Los valores de DPI deben estar entre 150 y 1200.")
-        if calidad_jpeg_portada and (calidad_jpeg_portada < 25 or calidad_jpeg_portada > 100):
-            raise ValueError("La calidad JPEG para Portadas debe estar entre 25 y 100.")
-        if calidad_jpeg_contraportada and (calidad_jpeg_contraportada < 25 or calidad_jpeg_contraportada > 100):
-            raise ValueError("La calidad JPEG para Contraportadas debe estar entre 25 y 100.")
+def convert_to_bw(img):
+    """Convierte imagen a blanco y negro (1-bit) para CCITT Group 4."""
+    return img.convert('L').point(lambda x: 0 if x < 128 else 255, '1')
 
-        carpetas_procesadas = 0
-        carpetas_totales = sum(1 for folder_name in os.listdir(root_folder) if os.path.isdir(os.path.join(root_folder, folder_name)))
-        
-        for i, folder_name in enumerate(os.listdir(root_folder)):
-            folder_path = os.path.join(root_folder, folder_name)
-            if os.path.isdir(folder_path):
-                input_folder = os.path.join(folder_path, 'input')
-                output_folder = os.path.join(folder_path, 'output')
+def numerical_sort(filename):
+    """Ordena archivos numéricamente para mantener secuencia."""
+    numbers = re.findall(r'\d+', filename)
+    return int(numbers[0]) if numbers else 0
 
-                if os.path.exists(input_folder) and os.path.exists(output_folder):
-                    actualizar_progreso((i + 1) / carpetas_totales * 100, f"Procesando: {folder_name}...")
-                    
-                    # Procesar portadas
-                    portadas_folder = os.path.join(input_folder, 'portadas')
-                    if os.path.exists(portadas_folder):
-                        convertir_imagenes_a_pdf(portadas_folder, output_folder, dpi_portadas, "Portadas", calidad_jpeg_portada)
-                    
-                    # Procesar internas
-                    internas_folder = os.path.join(input_folder, 'internas')
-                    if os.path.exists(internas_folder):
-                        convertir_imagenes_a_pdf(internas_folder, output_folder, dpi_portadas, formato_internas)
-                    
-                    # Procesar contraportadas
-                    contraportadas_folder = os.path.join(input_folder, 'contraportadas')
-                    if os.path.exists(contraportadas_folder):
-                        convertir_imagenes_a_pdf(contraportadas_folder, output_folder, dpi_contraportadas, "Contraportadas", calidad_jpeg_contraportada)
-                    
-                    carpetas_procesadas += 1
+def process_images(input_folder, output_folder, config):
+    """Procesa imágenes según configuración de la interfaz."""
+    files = {
+        'portadas': [],
+        'internas': [],
+        'contraportadas': []
+    }
 
-        actualizar_progreso(100, "Procesamiento completado.")
-        messagebox.showinfo("Completado", f"Se procesaron {carpetas_procesadas} carpetas.")
+    # Clasificar archivos
+    for filename in sorted(os.listdir(input_folder), key=numerical_sort):
+        lower_name = filename.lower()
+        if 'portada' in lower_name and lower_name.endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.png')):
+            files['portadas'].append(filename)
+        elif 'contraportada' in lower_name and lower_name.endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.png')):
+            files['contraportadas'].append(filename)
+        elif lower_name.endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.png')):
+            files['internas'].append(filename)
 
+    optimized = []
+
+    # Procesar portadas
+    for filename in files['portadas']:
+        input_path = os.path.join(input_folder, filename)
+        output_path = os.path.join(output_folder, f"opt_{os.path.splitext(filename)[0]}.jpg")
+        try:
+            with Image.open(input_path) as img:
+                img = correct_exif_orientation(img)
+                img.save(output_path, 'JPEG', 
+                         quality=config['calidad_jpeg_portada'] or 85,
+                         dpi=(config['dpi_portadas'], config['dpi_portadas']))
+                optimized.append(output_path)
+        except Exception as e:
+            print(f"Error procesando portada {filename}: {e}")
+
+    # Procesar internas
+    for filename in files['internas']:
+        input_path = os.path.join(input_folder, filename)
+        ext = 'tif' if config['formato_internas'] == 'CCITT Group 4' else 'jpg'
+        output_path = os.path.join(output_folder, f"opt_{os.path.splitext(filename)[0]}.{ext}")
+        try:
+            with Image.open(input_path) as img:
+                img = correct_exif_orientation(img)
+                if config['formato_internas'] == 'CCITT Group 4':
+                    img = convert_to_bw(img)
+                    img.save(output_path, 'TIFF', compression='group4',
+                             dpi=(config['dpi_internas'], config['dpi_internas']))
+                else:
+                    img.save(output_path, 'JPEG', 
+                             quality=85,
+                             dpi=(config['dpi_internas'], config['dpi_internas']))
+                optimized.append(output_path)
+        except Exception as e:
+            print(f"Error procesando interna {filename}: {e}")
+
+    # Procesar contraportadas
+    for filename in files['contraportadas']:
+        input_path = os.path.join(input_folder, filename)
+        output_path = os.path.join(output_folder, f"opt_{os.path.splitext(filename)[0]}.jpg")
+        try:
+            with Image.open(input_path) as img:
+                img = correct_exif_orientation(img)
+                img.save(output_path, 'JPEG', 
+                         quality=config['calidad_jpeg_contraportada'] or 85,
+                         dpi=(config['dpi_contraportadas'], config['dpi_contraportadas']))
+                optimized.append(output_path)
+        except Exception as e:
+            print(f"Error procesando contraportada {filename}: {e}")
+
+    return optimized
+
+def generar_pdf(imagenes, output_pdf):
+    """Genera PDF desde lista de imágenes optimizadas."""
+    try:
+        with open(output_pdf, "wb") as f:
+            f.write(img2pdf.convert([img for img in imagenes if os.path.exists(img)]))
+        return True
     except Exception as e:
-        messagebox.showerror("Error", f"Ocurrió un error: {e}")
-        actualizar_progreso(0, "Error en el procesamiento.")
+        print(f"Error generando PDF: {e}")
+        return False
 
-# Crear la interfaz gráfica
-root = tk.Tk()
-root.title("Conversor de Imágenes a PDF")
-centrar_ventana(root, 620, 400)
+# ------------------------- INTERFAZ GRÁFICA -------------------------
+class ConversorPDFApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Conversor de Imágenes a PDF")
+        self.centrar_ventana(620, 400)
+        
+        # Variables de configuración
+        self.opcion_internas = tk.StringVar(value="Sin procesar")
+        self.compresion_jpeg_portada = tk.BooleanVar(value=False)
+        self.compresion_jpeg_contraportada = tk.BooleanVar(value=False)
+        
+        self.crear_interfaz()
+    
+    def centrar_ventana(self, ancho, alto):
+        pantalla_ancho = self.root.winfo_screenwidth()
+        pantalla_alto = self.root.winfo_screenheight()
+        x = (pantalla_ancho // 2) - (ancho // 2)
+        y = (pantalla_alto // 2) - (alto // 2)
+        self.root.geometry(f"{ancho}x{alto}+{x}+{y}")
+    
+    def crear_interfaz(self):
+        # Frame principal
+        main_frame = tk.Frame(self.root)
+        main_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+        
+        # Selección de carpeta
+        frame_carpeta = tk.Frame(main_frame)
+        frame_carpeta.pack(fill=tk.X, pady=5)
+        
+        tk.Label(frame_carpeta, text="Carpeta raíz:").pack(side=tk.LEFT)
+        self.entry_carpeta = tk.Entry(frame_carpeta, width=40)
+        self.entry_carpeta.pack(side=tk.LEFT, padx=5)
+        tk.Button(frame_carpeta, text="Seleccionar", command=self.seleccionar_carpeta).pack(side=tk.LEFT)
+        
+        # Configuraciones
+        frame_contenedor = tk.Frame(main_frame)
+        frame_contenedor.pack(pady=10)
+        
+        # Sección Portadas
+        frame_portadas = tk.LabelFrame(frame_contenedor, text="Portadas", padx=10, pady=10)
+        frame_portadas.pack(side=tk.LEFT, padx=10)
+        
+        tk.Label(frame_portadas, text="DPI (150-1200):").pack()
+        self.spin_dpi_portada = tk.Spinbox(frame_portadas, from_=150, to=1200, width=5)
+        self.spin_dpi_portada.delete(0, tk.END)
+        self.spin_dpi_portada.insert(0, "300")
+        self.spin_dpi_portada.pack()
+        
+        tk.Checkbutton(frame_portadas, text="Compresión JPEG", 
+                      variable=self.compresion_jpeg_portada,
+                      command=lambda: self.toggle_compresion("portada")).pack(pady=5)
+        
+        tk.Label(frame_portadas, text="Calidad (25-100):").pack()
+        self.spin_calidad_portada = tk.Spinbox(frame_portadas, from_=25, to=100, width=5, state=tk.DISABLED)
+        self.spin_calidad_portada.pack()
+        
+        # Sección Internas
+        frame_internas = tk.LabelFrame(frame_contenedor, text="Internas", padx=10, pady=10)
+        frame_internas.pack(side=tk.LEFT, padx=10)
+        
+        tk.Radiobutton(frame_internas, text="Sin procesar", 
+                      variable=self.opcion_internas, value="Sin procesar",
+                      command=lambda: self.seleccionar_internas("Sin procesar")).pack()
+        
+        tk.Radiobutton(frame_internas, text="CCITT Group 4", 
+                      variable=self.opcion_internas, value="CCITT Group 4",
+                      command=lambda: self.seleccionar_internas("CCITT Group 4")).pack()
+        
+        # Sección Contraportadas
+        frame_contraportadas = tk.LabelFrame(frame_contenedor, text="Contraportadas", padx=10, pady=10)
+        frame_contraportadas.pack(side=tk.LEFT, padx=10)
+        
+        tk.Label(frame_contraportadas, text="DPI (150-1200):").pack()
+        self.spin_dpi_contraportada = tk.Spinbox(frame_contraportadas, from_=150, to=1200, width=5)
+        self.spin_dpi_contraportada.delete(0, tk.END)
+        self.spin_dpi_contraportada.insert(0, "300")
+        self.spin_dpi_contraportada.pack()
+        
+        tk.Checkbutton(frame_contraportadas, text="Compresión JPEG", 
+                      variable=self.compresion_jpeg_contraportada,
+                      command=lambda: self.toggle_compresion("contraportada")).pack(pady=5)
+        
+        tk.Label(frame_contraportadas, text="Calidad (25-100):").pack()
+        self.spin_calidad_contraportada = tk.Spinbox(frame_contraportadas, from_=25, to=100, width=5, state=tk.DISABLED)
+        self.spin_calidad_contraportada.pack()
+        
+        # Botón de inicio
+        tk.Button(main_frame, text="Iniciar Procesamiento", 
+                 command=self.iniciar_procesamiento).pack(pady=10)
+        
+        # Barra de progreso
+        frame_progreso = tk.Frame(main_frame)
+        frame_progreso.pack(fill=tk.X, pady=10)
+        
+        self.progress_label = tk.Label(frame_progreso, text="Esperando inicio...", anchor=tk.CENTER)
+        self.progress_label.pack(fill=tk.X)
+        
+        self.progress_bar = ttk.Progressbar(frame_progreso, orient=tk.HORIZONTAL, length=580, mode="determinate")
+        self.progress_bar.pack(fill=tk.X)
+    
+    def seleccionar_carpeta(self):
+        carpeta = filedialog.askdirectory()
+        if carpeta:
+            self.entry_carpeta.delete(0, tk.END)
+            self.entry_carpeta.insert(0, carpeta)
+    
+    def toggle_compresion(self, tipo):
+        if tipo == "portada":
+            if self.compresion_jpeg_portada.get():
+                self.spin_calidad_portada.config(state=tk.NORMAL)
+            else:
+                self.spin_calidad_portada.config(state=tk.DISABLED)
+        else:
+            if self.compresion_jpeg_contraportada.get():
+                self.spin_calidad_contraportada.config(state=tk.NORMAL)
+            else:
+                self.spin_calidad_contraportada.config(state=tk.DISABLED)
+    
+    def seleccionar_internas(self, opcion):
+        if opcion == "CCITT Group 4":
+            messagebox.showwarning("Aviso", "Las imágenes internas se convertirán a blanco y negro")
+    
+    def actualizar_progreso(self, valor, texto=None):
+        if texto:
+            self.progress_label.config(text=texto)
+        self.progress_bar['value'] = valor
+        self.root.update_idletasks()
+    
+    def iniciar_procesamiento(self):
+        carpeta_raiz = self.entry_carpeta.get()
+        if not carpeta_raiz or not os.path.isdir(carpeta_raiz):
+            messagebox.showerror("Error", "Seleccione una carpeta válida")
+            return
 
-# Frame principal
-main_frame = tk.Frame(root)
-main_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+        try:
+            config = {
+                'dpi_portadas': int(self.spin_dpi_portada.get()),
+                'dpi_contraportadas': int(self.spin_dpi_contraportada.get()),
+                'dpi_internas': int(self.spin_dpi_portada.get()),
+                'formato_internas': self.opcion_internas.get(),
+                'calidad_jpeg_portada': int(self.spin_calidad_portada.get()) if self.compresion_jpeg_portada.get() else None,
+                'calidad_jpeg_contraportada': int(self.spin_calidad_contraportada.get()) if self.compresion_jpeg_contraportada.get() else None
+            }
 
-# Frame para la selección de carpeta
-frame_carpeta = tk.Frame(main_frame)
-frame_carpeta.pack(fill=tk.X, pady=5)
-tk.Label(frame_carpeta, text="Carpeta raíz:").pack(side=tk.LEFT)
-entry_carpeta = tk.Entry(frame_carpeta, width=40)
-entry_carpeta.pack(side=tk.LEFT, padx=5)
-tk.Button(frame_carpeta, text="Seleccionar", command=seleccionar_carpeta).pack(side=tk.LEFT)
+            # Validar DPI
+            for dpi in [config['dpi_portadas'], config['dpi_contraportadas'], config['dpi_internas']]:
+                if not 150 <= dpi <= 1200:
+                    raise ValueError("Los valores de DPI deben estar entre 150 y 1200")
 
-# Frame contenedor de las secciones
-frame_contenedor = tk.Frame(main_frame)
-frame_contenedor.pack(pady=10)
+            total_carpetas = sum(1 for name in os.listdir(carpeta_raiz) 
+                            if os.path.isdir(os.path.join(carpeta_raiz, name)))
+            procesadas = 0
+            imagenes_totales = 0
 
-# -------------------------- SECCIÓN PORTADAS --------------------------
-frame_portadas = tk.LabelFrame(frame_contenedor, text="Portadas", padx=10, pady=10)
-frame_portadas.pack(side=tk.LEFT, padx=10)
+            for folder_name in os.listdir(carpeta_raiz):
+                folder_path = os.path.join(carpeta_raiz, folder_name)
+                if os.path.isdir(folder_path):
+                    input_folder = os.path.join(folder_path, 'input')
+                    output_folder = os.path.join(folder_path, 'output')
+                    
+                    if os.path.exists(input_folder):
+                        if not os.path.exists(output_folder):
+                            os.makedirs(output_folder)
+                        
+                        self.actualizar_progreso(
+                            (procesadas/total_carpetas)*100, 
+                            f"Procesando {folder_name}..."
+                        )
+                        
+                        imagenes = process_images(input_folder, output_folder, config)
+                        pdf_path = os.path.join(output_folder, "documento.pdf")
+                        
+                        if generar_pdf(imagenes, pdf_path):
+                            imagenes_totales += len(imagenes)
+                            procesadas += 1
 
-# DPI Portadas
-tk.Label(frame_portadas, text="DPI (150-1200):").pack()
-spin_dpi_portada = tk.Spinbox(frame_portadas, from_=150, to=1200, width=5)
-spin_dpi_portada.delete(0, tk.END)
-spin_dpi_portada.insert(0, "300")
-spin_dpi_portada.pack()
+            self.actualizar_progreso(100, "Procesamiento completado")
+            messagebox.showinfo(
+                "Resultado",
+                f"Procesadas {procesadas} carpetas\n"
+                f"Total imágenes convertidas: {imagenes_totales}"
+            )
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error:\n{str(e)}")
+            self.actualizar_progreso(0, "Error en el procesamiento")
 
-# Compresión JPEG Portadas
-compresion_jpeg_portada = tk.BooleanVar(value=False)
-tk.Checkbutton(frame_portadas, text="Compresión JPEG", variable=compresion_jpeg_portada, 
-              command=lambda: toggle_compresion_jpeg("portada")).pack(pady=5)
-tk.Label(frame_portadas, text="Calidad (25-100):").pack()
-spin_calidad_jpeg_portada = tk.Spinbox(frame_portadas, from_=25, to=100, width=5, state=tk.DISABLED)
-spin_calidad_jpeg_portada.pack()
-
-# -------------------------- SECCIÓN INTERNAS --------------------------
-frame_internas = tk.LabelFrame(frame_contenedor, text="Internas", padx=10, pady=10)
-frame_internas.pack(side=tk.LEFT, padx=10)
-opcion_internas = tk.StringVar(value="Sin procesar")
-tk.Radiobutton(
-    frame_internas, 
-    text="Sin procesar", 
-    variable=opcion_internas, 
-    value="Sin procesar",
-    command=lambda: seleccionar_internas("Sin procesar")
-).pack()
-tk.Radiobutton(
-    frame_internas, 
-    text="CCITT Group 4", 
-    variable=opcion_internas, 
-    value="CCITT Group 4",
-    command=lambda: seleccionar_internas("CCITT Group 4")
-).pack()
-
-# ----------------------- SECCIÓN CONTRAPORTADAS -----------------------
-frame_contraportadas = tk.LabelFrame(frame_contenedor, text="Contraportadas", padx=10, pady=10)
-frame_contraportadas.pack(side=tk.LEFT, padx=10)
-
-# DPI Contraportadas
-tk.Label(frame_contraportadas, text="DPI (150-1200):").pack()
-spin_dpi_contraportada = tk.Spinbox(frame_contraportadas, from_=150, to=1200, width=5)
-spin_dpi_contraportada.delete(0, tk.END)
-spin_dpi_contraportada.insert(0, "300")
-spin_dpi_contraportada.pack()
-
-# Compresión JPEG Contraportadas
-compresion_jpeg_contraportada = tk.BooleanVar(value=False)
-tk.Checkbutton(frame_contraportadas, text="Compresión JPEG", variable=compresion_jpeg_contraportada,
-              command=lambda: toggle_compresion_jpeg("contraportada")).pack(pady=5)
-tk.Label(frame_contraportadas, text="Calidad (25-100):").pack()
-spin_calidad_jpeg_contraportada = tk.Spinbox(frame_contraportadas, from_=25, to=100, width=5, state=tk.DISABLED)
-spin_calidad_jpeg_contraportada.pack()
-
-# Botón de inicio
-tk.Button(main_frame, text="Iniciar", command=procesar).pack(pady=10)
-
-# Barra de progreso
-frame_progreso = tk.Frame(main_frame)
-frame_progreso.pack(fill=tk.X, pady=10)
-progress_label = tk.Label(frame_progreso, text="", anchor=tk.CENTER)
-progress_label.pack(fill=tk.X)
-progress_bar = ttk.Progressbar(frame_progreso, orient=tk.HORIZONTAL, length=580, mode="determinate")
-progress_bar.pack(fill=tk.X)
-
-root.mainloop()
+# ------------------------- EJECUCIÓN -------------------------
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ConversorPDFApp(root)
+    root.mainloop()
